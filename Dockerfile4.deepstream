@@ -1,0 +1,47 @@
+FROM nvcr.io/nvidia/deepstream:4.0.1-19.09-devel
+
+COPY . /workspace/retinanet-examples/
+
+# TODO: figure out how to remove unnecessary deps
+RUN apt-get update -y && apt-get install \
+        build-essential \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender-dev \
+        nodejs npm wget git cmake ffmpeg vim -y \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /root
+
+RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh --quiet -O miniconda.sh && \
+    bash ./miniconda.sh -b && \
+    rm miniconda.sh
+
+ENV DeepStream_DIR=/root/deepstream_sdk_v4.0.1_x86_64/
+ENV TensorRT_DIR=/usr/
+ENV PATH $PATH:/root/miniconda3/bin/
+
+RUN conda install python=3.6 && \
+    conda install pip -y
+
+# Install TensorRT.
+RUN apt-get update && apt-get install -y wget && \
+    wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/nvidia-machine-learning-repo-ubuntu1604_1.0.0-1_amd64.deb && \
+    dpkg -i nvidia-machine-learning-repo-*.deb && \
+    apt-get update && apt-get install -y libnvinfer-dev=5.1.5-1+cuda10.1
+
+RUN pip install torch torchvision cython
+RUN pip install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
+
+RUN ln -sf /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
+
+RUN pip install --no-cache-dir -e /workspace/retinanet-examples
+
+WORKDIR /workspace/retinanet-examples/extras/cppapi/
+RUN mkdir build && cd build && cmake -DCMAKE_CUDA_FLAGS="--expt-extended-lambda -std=c++11" .. && make
+
+WORKDIR /workspace/retinanet-examples/extras/deepstream/deepstream-sample/
+RUN mkdir build && cd build && cmake .. && make
+
+WORKDIR /workspace/retinanet-examples/extras/deepstream
