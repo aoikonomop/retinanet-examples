@@ -1,7 +1,5 @@
 FROM nvcr.io/nvidia/deepstream:4.0.1-19.09-devel
 
-COPY . /workspace/retinanet-examples/
-
 # TODO: figure out how to remove unnecessary deps
 RUN apt-get update -y && apt-get install \
         build-essential \
@@ -9,10 +7,17 @@ RUN apt-get update -y && apt-get install \
         libsm6 \
         libxext6 \
         libxrender-dev \
+        libopencv-dev\
+        python3-opencv \
         nodejs npm wget git cmake ffmpeg vim -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root
+
+#RUN git clone https://github.com/edenhill/librdkafka.git /librdkafka && \
+#    cd /librdkafka && ./configure && make && make install && \
+#    mkdir -p /usr/local/deepstream && \
+#    cp /usr/local/lib/librdkafka* /usr/local/deepstream
 
 RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh --quiet -O miniconda.sh && \
     bash ./miniconda.sh -b && \
@@ -31,8 +36,15 @@ RUN apt-get update && apt-get install -y wget && \
 
 RUN pip install torch torchvision cython
 RUN pip install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
+RUN pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/cuda/10.0 nvidia-dali
 
 RUN ln -sf /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
+
+WORKDIR /workspace
+WORKDIR /workspace
+RUN git clone https://github.com/aoikonomop/retinanet-examples.git && \
+    cd retinanet-examples && \
+    git checkout Deepstream4_env
 
 RUN pip install --no-cache-dir -e /workspace/retinanet-examples
 
