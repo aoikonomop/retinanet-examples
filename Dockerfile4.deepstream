@@ -1,5 +1,7 @@
 FROM nvcr.io/nvidia/deepstream:4.0.1-19.09-devel
 
+COPY . /workspace/retinanet-examples/
+
 # TODO: figure out how to remove unnecessary deps
 RUN apt-get update -y && apt-get install \
         build-essential \
