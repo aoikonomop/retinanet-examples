@@ -23,12 +23,6 @@ ENV PATH $PATH:/root/miniconda3/bin/
 RUN conda install python=3.6 && \
     conda install pip -y
 
-# Install TensorRT.
-RUN apt-get update && apt-get install -y wget && \
-    wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/nvidia-machine-learning-repo-ubuntu1604_1.0.0-1_amd64.deb && \
-    dpkg -i nvidia-machine-learning-repo-*.deb && \
-    apt-get update && apt-get install -y libnvinfer-dev=5.1.5-1+cuda10.1
-
 RUN pip install torch torchvision cython
 RUN pip install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
 RUN pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/cuda/10.0 nvidia-dali
