@@ -5,11 +5,9 @@ set(CMAKE_CXX_STANDARD 11)
 find_package(CUDA REQUIRED)
 enable_language(CUDA)
 
-set(TensorRT_DIR "$ENV{TensorRT_DIR}")
-
 if(DEFINED TensorRT_DIR)
-  include_directories("${TensorRT_DIR}/include/x86_64-linux-gnu/")
-  link_directories("${TensorRT_DIR}/lib/x86_64-linux-gnu/")
+  include_directories("${TensorRT_DIR}/include/")
+  link_directories("${TensorRT_DIR}/lib/")
 endif(DEFINED TensorRT_DIR)
 include_directories(${CUDA_INCLUDE_DIRS})
 
