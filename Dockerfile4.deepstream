@@ -41,7 +41,6 @@ RUN pip install --extra-index-url https://developer.download.nvidia.com/compute/
 RUN ln -sf /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
 
 WORKDIR /workspace
-WORKDIR /workspace
 RUN git clone https://github.com/aoikonomop/retinanet-examples.git && \
     cd retinanet-examples && \
     git checkout Deepstream4_env
