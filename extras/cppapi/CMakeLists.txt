@@ -6,8 +6,8 @@ find_package(CUDA REQUIRED)
 enable_language(CUDA)
 
 if(DEFINED TensorRT_DIR)
-  include_directories("${TensorRT_DIR}/include/")
-  link_directories("${TensorRT_DIR}/lib/")
+  include_directories("${TensorRT_DIR}/include")
+  link_directories("${TensorRT_DIR}/lib")
 endif(DEFINED TensorRT_DIR)
 include_directories(${CUDA_INCLUDE_DIRS})
 
