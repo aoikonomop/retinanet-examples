@@ -1,0 +1,45 @@
+FROM nvcr.io/nvidia/deepstream:4.0.1-19.09-devel
+
+# TODO: figure out how to remove unnecessary deps
+RUN apt-get update -y && apt-get install \
+        build-essential \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender-dev \
+        libopencv-dev\
+        python3-opencv \
+        nodejs npm wget git cmake ffmpeg vim -y \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /root
+
+RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh --quiet -O miniconda.sh && \
+    bash ./miniconda.sh -b && \
+    rm miniconda.sh
+
+ENV PATH $PATH:/root/miniconda3/bin/
+
+RUN conda install python=3.6 && \
+    conda install pip -y
+
+RUN pip install torch torchvision cython
+RUN pip install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
+RUN pip install --extra-index-url https://developer.download.nvidia.com/compute/redist/cuda/10.0 nvidia-dali
+
+RUN ln -sf /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so
+
+WORKDIR /workspace
+RUN git clone https://github.com/aoikonomop/retinanet-examples.git && \
+    cd retinanet-examples && \
+    git checkout Deepstream4_env
+
+RUN pip install --no-cache-dir -e /workspace/retinanet-examples
+
+WORKDIR /workspace/retinanet-examples/extras/cppapi/
+RUN mkdir build && cd build && cmake -DCMAKE_CUDA_FLAGS="--expt-extended-lambda -std=c++11" .. && make
+
+WORKDIR /workspace/retinanet-examples/extras/deepstream/deepstream-sample/
+RUN mkdir build && cd build && cmake -DDeepStream_DIR=/root/deepstream_sdk_v4.0.1_x86_64/ .. && make
+
+WORKDIR /workspace/retinanet-examples/extras/deepstream
